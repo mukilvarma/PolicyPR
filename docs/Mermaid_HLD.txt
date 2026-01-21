@@ -1,0 +1,76 @@
+flowchart LR
+    %% ======================
+    %% GitHub
+    %% ======================
+    subgraph GitHub
+        PR[Pull Request Event]
+        APP[GitHub App]
+        PR --> APP
+    end
+
+    %% ======================
+    %% Azure Serverless
+    %% ======================
+    subgraph Azure
+        WEBHOOK[Azure Function - Webhook]
+        QUEUE[Service Bus Queue]
+        ORCH[Durable Orchestrator]
+
+        FETCH[Worker - Fetch PR Data]
+        ANALYZE[Worker - Static Analysis]
+        RAG[Worker - RAG Retrieval]
+        SCORE[Worker - Scoring Engine]
+        AI[Worker - AI Explanation]
+        PUBLISH[Worker - Publish Results]
+
+        DB[(Cosmos DB)]
+        BLOB[(Blob Storage)]
+        VAULT[Key Vault]
+        OBS[Application Insights]
+    end
+
+    %% ======================
+    %% Flow
+    %% ======================
+    APP --> WEBHOOK
+    WEBHOOK --> QUEUE
+    QUEUE --> ORCH
+
+    ORCH --> FETCH
+    FETCH --> BLOB
+    FETCH --> DB
+
+    ORCH --> ANALYZE
+    ANALYZE --> BLOB
+    ANALYZE --> DB
+
+    ORCH --> RAG
+    RAG --> DB
+
+    ORCH --> SCORE
+    SCORE --> DB
+
+    ORCH --> AI
+    AI --> DB
+
+    ORCH --> PUBLISH
+    PUBLISH --> APP
+
+    %% ======================
+    %% Shared Services
+    %% ======================
+    WEBHOOK --> VAULT
+    FETCH --> VAULT
+    ANALYZE --> VAULT
+    RAG --> VAULT
+    AI --> VAULT
+    PUBLISH --> VAULT
+
+    WEBHOOK --> OBS
+    ORCH --> OBS
+    FETCH --> OBS
+    ANALYZE --> OBS
+    RAG --> OBS
+    SCORE --> OBS
+    AI --> OBS
+    PUBLISH --> OBS
